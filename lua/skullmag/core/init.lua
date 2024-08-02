@@ -1,2 +1,2 @@
-require("skullamg.core.options")
-require("skullamg.core.keymaps")
+require("skullmag.core.options")
+require("skullmag.core.keymaps")

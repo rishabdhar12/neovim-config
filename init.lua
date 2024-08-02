@@ -1,2 +1,2 @@
-require("skullamg.core")
-require("skullamg.lazy")
+require("skullmag.core")
+require("skullmag.lazy")
