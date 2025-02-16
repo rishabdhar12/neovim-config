@@ -104,6 +104,16 @@ _G.packer_plugins = {
     path = "/home/skullmag/.local/share/nvim/site/pack/packer/start/cmp_luasnip",
     url = "https://github.com/saadparwaiz1/cmp_luasnip"
   },
+  ["dressing.nvim"] = {
+    loaded = true,
+    path = "/home/skullmag/.local/share/nvim/site/pack/packer/start/dressing.nvim",
+    url = "https://github.com/stevearc/dressing.nvim"
+  },
+  ["flutter-tools.nvim"] = {
+    loaded = true,
+    path = "/home/skullmag/.local/share/nvim/site/pack/packer/start/flutter-tools.nvim",
+    url = "https://github.com/nvim-flutter/flutter-tools.nvim"
+  },
   ["friendly-snippets"] = {
     loaded = true,
     path = "/home/skullmag/.local/share/nvim/site/pack/packer/start/friendly-snippets",
@@ -158,6 +168,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/skullmag/.local/share/nvim/site/pack/packer/start/plenary.nvim",
     url = "https://github.com/nvim-lua/plenary.nvim"
+  },
+  ["refactoring.nvim"] = {
+    loaded = true,
+    path = "/home/skullmag/.local/share/nvim/site/pack/packer/start/refactoring.nvim",
+    url = "https://github.com/theprimeagen/refactoring.nvim"
   },
   ["rose-pine"] = {
     config = { "\27LJ\2\n9\0\0\3\0\3\0\0056\0\0\0009\0\1\0'\2\2\0B\0\2\1K\0\1\0\26colorscheme rose-pine\bcmd\bvim\0" },

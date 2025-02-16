@@ -38,3 +38,14 @@ vim.keymap.set("n", "<leader>mr", "<cmd>CellularAutomaton make_it_rain<CR>");
 vim.keymap.set("n", "<leader><leader>", function()
     vim.cmd("so")
 end)
+
+-- split vertically
+vim.keymap.set("n", "<leader>vs", "<cmd>vsplit<CR>")
+
+-- split horizontally
+vim.keymap.set("n", "<leader>vh", "<cmd>split<CR>")
+
+vim.keymap.set("n", "<leader>h", "<C-w>h")  -- Move to left split
+vim.keymap.set("n", "<leader>j", "<C-w>j")  -- Move to below split
+vim.keymap.set("n", "<leader>k", "<C-w>k")  -- Move to above split
+vim.keymap.set("n", "<leader>l", "<C-w>l")  -- Move to right split
