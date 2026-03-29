@@ -33,14 +33,15 @@ vim.opt.signcolumn = "yes"
 vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
 vim.opt.colorcolumn = "130"
 
 local function set_cursor_highlight()
   vim.api.nvim_set_hl(0, "Cursor", {
     fg = "#101010",
-    bg = "#ffffff",
-    blend = 20,
+    bg = "#696969",
+    -- blend = 70,
     nocombine = true,
   })
   vim.api.nvim_set_hl(0, "lCursor", { link = "Cursor" })
