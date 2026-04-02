@@ -3,7 +3,7 @@ vim.opt.guicursor = table.concat({
   "i-ci-ve:block-Cursor",
   "r-cr:hor20-Cursor",
   "o:hor50-Cursor",
-  "a:blinkwait700-blinkoff400-blinkon250",
+  -- "a:blinkwait700-blinkoff400-blinkon250",
 }, ",")
 
 vim.opt.nu = true
@@ -35,7 +35,7 @@ vim.opt.isfname:append("@-@")
 vim.opt.updatetime = 50
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
-vim.opt.colorcolumn = "130"
+vim.opt.colorcolumn = "120"
 
 local function set_cursor_highlight()
   vim.api.nvim_set_hl(0, "Cursor", {
