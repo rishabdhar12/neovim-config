@@ -40,7 +40,8 @@ vim.opt.colorcolumn = "120"
 local function set_cursor_highlight()
   vim.api.nvim_set_hl(0, "Cursor", {
     fg = "#101010",
-    bg = "#696969",
+    -- bg = "#696969",
+    bg = "#FFFFFF",
     -- blend = 70,
     nocombine = true,
   })
@@ -74,6 +75,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 })
 
 vim.opt.background = "dark"
-vim.cmd.colorscheme("default")
+-- vim.cmd.colorscheme("default")
 set_cursor_highlight()
-set_pitch_black_background()
+-- set_pitch_black_background()
