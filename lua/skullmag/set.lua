@@ -74,6 +74,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 })
 
 vim.opt.background = "dark"
-vim.cmd.colorscheme("default")
+-- vim.cmd.colorscheme("default")
 set_cursor_highlight()
 set_pitch_black_background()

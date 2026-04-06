@@ -1,5 +1,13 @@
 return {
   {
+    "blazkowolf/gruber-darker.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme("gruber-darker")
+    end,
+  },
+  {
     "nvim-lua/plenary.nvim",
     lazy = true,
   },
@@ -79,14 +87,133 @@ return {
 
       require("nvim-treesitter.configs").setup({
         parser_install_dir = parser_install_dir,
-        ensure_installed = { "javascript", "typescript", "c", "lua", "rust", "python", "go", "dart" },
+        ensure_installed = {
+          "bash",
+          "c",
+          "dart",
+          "go",
+          "java",
+          "javascript",
+          "json",
+          "kotlin",
+          "lua",
+          "python",
+          "rust",
+          "toml",
+          "tsx",
+          "typescript",
+          "vim",
+          "xml",
+          "yaml",
+        },
         sync_install = false,
         auto_install = true,
         highlight = {
           enable = true,
           additional_vim_regex_highlighting = false,
         },
+        indent = {
+          enable = true,
+        },
       })
+    end,
+  },
+  {
+    "stevearc/conform.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      require("conform").setup({
+        notify_on_error = true,
+        formatters_by_ft = {
+          kotlin = { "ktlint" },
+        },
+      })
+    end,
+  },
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local lint = require("lint")
+      local lint_group = vim.api.nvim_create_augroup("SkullmagLint", { clear = true })
+
+      lint.linters_by_ft = {
+        kotlin = { "ktlint" },
+      }
+
+      vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+        group = lint_group,
+        callback = function()
+          lint.try_lint()
+        end,
+      })
+    end,
+  },
+  {
+    "mfussenegger/nvim-dap",
+    lazy = false,
+    dependencies = {
+      {
+        "rcarriga/nvim-dap-ui",
+        dependencies = {
+          "nvim-neotest/nvim-nio",
+        },
+      },
+      {
+        "theHamsta/nvim-dap-virtual-text",
+      },
+    },
+    config = function()
+      local dap = require("dap")
+      local dapui = require("dapui")
+      local android = require("skullmag.android")
+      local adapter_path = vim.fn.exepath("kotlin-debug-adapter")
+
+      dapui.setup({})
+      require("nvim-dap-virtual-text").setup({})
+
+      vim.fn.sign_define("DapBreakpoint", { text = "B", texthl = "DiagnosticError" })
+      vim.fn.sign_define("DapStopped", { text = ">", texthl = "DiagnosticWarn" })
+      vim.fn.sign_define("DapBreakpointRejected", { text = "R", texthl = "DiagnosticError" })
+      vim.fn.sign_define("DapLogPoint", { text = "L", texthl = "DiagnosticInfo" })
+
+      dap.listeners.after.event_initialized["skullmag_dapui"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["skullmag_dapui"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["skullmag_dapui"] = function()
+        dapui.close()
+      end
+
+      dap.adapters.kotlin = {
+        type = "executable",
+        command = adapter_path ~= "" and adapter_path or "kotlin-debug-adapter",
+      }
+
+      dap.configurations.kotlin = {
+        {
+          type = "kotlin",
+          request = "launch",
+          name = "Launch current Kotlin file",
+          projectRoot = "${workspaceFolder}",
+          mainClass = function()
+            return vim.fn.input("Kotlin main class: ", android.guess_kotlin_main_class())
+          end,
+        },
+        {
+          type = "kotlin",
+          request = "attach",
+          name = "Attach on localhost:5005",
+          projectRoot = "${workspaceFolder}",
+          hostName = "127.0.0.1",
+          port = 5005,
+          timeout = 5000,
+        },
+      }
+
+      dap.configurations.java = vim.deepcopy(dap.configurations.kotlin)
     end,
   },
   {
@@ -168,15 +295,33 @@ return {
       local luasnip = require("luasnip")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local cmp_select = { behavior = cmp.SelectBehavior.Select }
+      local mason_registry = require("mason-registry")
+
+      local function ensure_mason_packages(package_names)
+        for _, package_name in ipairs(package_names) do
+          local ok, package = pcall(mason_registry.get_package, package_name)
+          if ok and not package:is_installed() then
+            package:install()
+          end
+        end
+      end
 
       require("luasnip.loaders.from_vscode").lazy_load()
       require("mason").setup()
+      mason_registry.refresh(function()
+        ensure_mason_packages({
+          "kotlin-language-server",
+          "kotlin-debug-adapter",
+          "ktlint",
+        })
+      end)
+
       require("mason-lspconfig").setup({
-        ensure_installed = { "eslint", "lua_ls", "rust_analyzer" },
+        ensure_installed = { "eslint", "lemminx", "lua_ls", "rust_analyzer" },
         automatic_enable = false,
       })
 
-      local on_attach = function(_, bufnr)
+      local on_attach = function(client, bufnr)
         local opts = { buffer = bufnr, remap = false }
 
         vim.keymap.set("n", "gd", function()
@@ -209,12 +354,67 @@ return {
         vim.keymap.set("i", "<C-h>", function()
           vim.lsp.buf.signature_help()
         end, opts)
+
+        if client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end
+
+        if client:supports_method(vim.lsp.protocol.Methods.textDocument_codeLens) then
+          local code_lens_group = vim.api.nvim_create_augroup("SkullmagCodeLens" .. bufnr, { clear = true })
+          vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
+            group = code_lens_group,
+            buffer = bufnr,
+            callback = function()
+              pcall(vim.lsp.codelens.refresh)
+            end,
+          })
+        end
       end
 
       vim.lsp.config("*", {
         capabilities = capabilities,
         on_attach = on_attach,
       })
+
+      vim.lsp.config("kotlin_language_server", {
+        settings = {
+          kotlin = {
+            completion = {
+              snippets = {
+                enabled = true,
+              },
+            },
+            debugAdapter = {
+              enabled = true,
+              path = vim.fn.exepath("kotlin-debug-adapter"),
+            },
+            diagnostics = {
+              enabled = true,
+              level = "hint",
+            },
+            externalSources = {
+              useKlsScheme = true,
+            },
+            indexing = {
+              enabled = true,
+            },
+            inlayHints = {
+              chainedHints = true,
+              parameterHints = true,
+              typeHints = true,
+            },
+            java = {
+              home = vim.env.JAVA_HOME or "",
+            },
+            scripts = {
+              buildScriptsEnabled = true,
+              enabled = true,
+            },
+          },
+        },
+      })
+
+      vim.lsp.config("lemminx", {})
 
       vim.lsp.config("lua_ls", {
         settings = {
@@ -232,7 +432,7 @@ return {
         },
       })
 
-      vim.lsp.enable({ "eslint", "lua_ls", "rust_analyzer" })
+      vim.lsp.enable({ "eslint", "kotlin_language_server", "lemminx", "lua_ls", "rust_analyzer" })
 
       cmp.setup({
         snippet = {
@@ -279,7 +479,19 @@ return {
       })
 
       vim.diagnostic.config({
-        virtual_text = true,
+        severity_sort = true,
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        virtual_text = {
+          prefix = "*",
+          spacing = 2,
+          source = "if_many",
+        },
+        float = {
+          border = "rounded",
+          source = "if_many",
+        },
       })
     end,
   },
