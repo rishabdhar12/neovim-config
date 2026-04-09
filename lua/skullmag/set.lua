@@ -15,6 +15,7 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 
 vim.opt.smartindent = true
+vim.opt.formatoptions:remove("o")
 
 vim.opt.wrap = true
 
@@ -74,7 +75,13 @@ vim.api.nvim_create_autocmd("ColorScheme", {
   end,
 })
 
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    vim.opt_local.formatoptions:remove("o")
+  end,
+})
+
 vim.opt.background = "dark"
 -- vim.cmd.colorscheme("default")
 set_cursor_highlight()
--- set_pitch_black_background()
+set_pitch_black_background()
