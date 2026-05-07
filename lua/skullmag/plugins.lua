@@ -191,7 +191,7 @@ return {
           require("mason").setup()
           require("mason-lspconfig").setup({
             ensure_installed = { "eslint", "lua_ls", "rust_analyzer" },
-            automatic_enable = false,
+            automatic_enable = true,
           })
 
           local on_attach = function(_, bufnr)
